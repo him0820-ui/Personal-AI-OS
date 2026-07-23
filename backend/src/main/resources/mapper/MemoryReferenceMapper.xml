@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.personalai.os.mapper.MemoryReferenceMapper">
+
+    <select id="selectByUserId" resultType="com.personalai.os.entity.MemoryReference">
+        SELECT * FROM memory_reference WHERE user_id = #{userId} ORDER BY referenced_at DESC
+    </select>
+
+    <select id="selectByFactId" resultType="com.personalai.os.entity.MemoryReference">
+        SELECT * FROM memory_reference WHERE fact_id = #{factId} ORDER BY referenced_at DESC
+    </select>
+
+    <select id="countReferencesByFactId" resultType="int">
+        SELECT COUNT(*) FROM memory_reference WHERE fact_id = #{factId}
+    </select>
+
+    <select id="sumImportanceGainByFactId" resultType="int">
+        SELECT SUM(importance_gain) FROM memory_reference WHERE fact_id = #{factId}
+    </select>
+
+</mapper>

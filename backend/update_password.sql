@@ -1,0 +1,1 @@
+UPDATE user SET password = '$2a$10$tAr3P6K.de95IkQ.xFpRR.ut1WJ.W.uNNXczcAHlVyqEEb40jAygy' WHERE username = '唐琦';

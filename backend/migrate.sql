@@ -1,0 +1,1 @@
+ALTER TABLE memory_todo CHANGE COLUMN content title VARCHAR(200) NOT NULL;

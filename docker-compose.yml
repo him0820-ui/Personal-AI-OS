@@ -1,0 +1,129 @@
+services:
+  mysql:
+    image: mysql:8.0
+    # MySQL 用本机原生服务（已有 personal_ai_os 真实数据），默认不起容器。
+    # 仅在需要完整容器化栈时显式启用：docker-compose --profile full up -d mysql
+    profiles: ["full"]
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: personal_ai_os
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 123456
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      REDIS_PASSWORD: 123456
+      TZ: Asia/Shanghai
+    command: redis-server --requirepass 123456
+    restart: unless-stopped
+    healthcheck:
+      # redis 设了 requirepass，healthcheck 必须带密码，否则收到 NOAUTH（虽退出码0假健康，但不严谨）。
+      test: ["CMD", "redis-cli", "-a", "123456", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  qdrant:
+    image: qdrant/qdrant:v1.18.1
+    # Qdrant 与 Redis 同为基础设施，默认随 `docker compose up -d` 一起启动。
+    # 向量数据存在命名卷 qdrant_storage，重建容器不丢数据（除非 docker compose down -v）。
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      QDRANT__LOG_LEVEL: INFO
+      QDRANT__STORAGE__SLOW_LOG_THRESHOLD: 1000ms
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/collections"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    # 后端在 IDE 里本地跑（秒级重启 + 可打断点），默认不进容器。
+    profiles: ["full"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/personal_ai_os?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: 123456
+      SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      SPRING_AI_VECTORSTORE_QDRANT_HOST: qdrant
+      SPRING_AI_VECTORSTORE_QDRANT_PORT: 6334
+      JWT_SECRET: personal-ai-os-jwt-secret-key-2024
+      JWT_EXPIRATION: 86400000
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/me"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    # 前端用 npm run dev（HMR 热更新），默认不进容器。
+    profiles: ["full"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  qdrant_storage:
+    driver: local
+
+networks:
+  default:
+    name: personal-ai-os-network
