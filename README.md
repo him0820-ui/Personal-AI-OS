@@ -346,17 +346,6 @@ docker-compose 中 `backend` 服务通过 `SPRING_AI_OLLAMA_BASE_URL=http://host
 
 ---
 
-## 📸 界面截图
-
-> ⚠️ 运行项目后可在此处补充截图：
-> 1. 登录 / 注册页
-> 2. 聊天界面（展开 `<think>` 推理过程的效果 + 流式打字机效果）
-> 3. Memory 记忆管理页（按 Person/Skill/Preference/Goal/Todo 分类展示）
-> 4. Planner 规划智能体执行目标分解的结果页
-> 5. Review 冲突审查页
-
----
-
 ## 📝 License
 
 本项目在满足以下条件时欢迎使用/二次开发：**保留作者版权声明 + 相同方式共享**。
