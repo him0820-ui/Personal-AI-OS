@@ -12,7 +12,9 @@ export function useWebSocketChat(userId: number, sessionId: number) {
   const messages = ref<WebSocketMessage[]>([])
 
   const connect = () => {
-    const wsUrl = `ws://${window.location.hostname}:8080/ws`
+    const protocol =
+      location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${protocol}//${window.location.host}/ws`
     const wsFactory = () => new WebSocket(wsUrl)
     
     stompClient.value = new Stomp.Client({

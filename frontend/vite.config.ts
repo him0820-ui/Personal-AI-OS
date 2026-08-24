@@ -10,6 +10,7 @@ export default defineConfig({
     }
   },
   server: {
+    allowedHosts:['www.u1639516.nyat.app'],
     port: 5175,
     proxy: {
       '/api': {
@@ -19,7 +20,12 @@ export default defineConfig({
       '/ws': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        ws: true
+        ws: true,
+        configure(proxy) {
+          proxy.on('proxyReqWs', (proxyReq, req) => {
+            console.log('收到 WebSocket 请求:', req.url)
+          })
+        }
       }
     }
   },

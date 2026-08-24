@@ -79,7 +79,10 @@ const connect = () => {
 
   console.log('[NotificationListener] Connecting to WebSocket...')
   
-  const wsUrl = `ws://${window.location.hostname}:8080/ws`
+  const protocol =
+      location.protocol === 'https:' ? 'wss:' : 'ws:'
+
+  const wsUrl = `${protocol}//${window.location.host}/ws`
   console.log('[NotificationListener] WebSocket URL:', wsUrl)
   
   const wsFactory = () => {
@@ -150,6 +153,7 @@ const connect = () => {
   }
 
   stompClient.activate()
+
 }
 
 const disconnect = () => {

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<script setup lang="ts">
+﻿﻿<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '@/api'
