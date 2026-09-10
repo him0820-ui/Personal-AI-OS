@@ -1,1 +1,0 @@
-SELECT id, user_id, `key`, value FROM memory_fact WHERE user_id=1;
