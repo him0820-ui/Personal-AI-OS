@@ -12,8 +12,8 @@ spring:
   
   datasource:
     url: jdbc:mysql://localhost:3306/personal_ai_os?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
-    username: root
-    password: 123456
+    username: yourName
+    password: yourPassword
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   sql:
